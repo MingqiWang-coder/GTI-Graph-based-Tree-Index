@@ -1,24 +1,33 @@
-cmake_minimum_required(VERSION 3.2)
-project(GTI LANGUAGES CXX) 
+cmake_minimum_required(VERSION 3.10)
+project(GTI LANGUAGES CXX)
+
+# 强制使用旧ABI，和extern_libraries/n2库保持一致
+add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
 
 set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-aux_source_directory(src SRC_LIST)
-include_directories(include)
 
-#OpenMP
-find_package(OpenMP)
-if (OPENMP_FOUND)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+# OpenMP
+find_package(OpenMP REQUIRED)
+if(OPENMP_FOUND)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 else()
-    message(FATAL_ERROR "no OpenMP supprot")
+    message(FATAL_ERROR "OpenMP not found")
 endif()
 
-add_definitions (-std=c++11 -O3 -lboost -march=native -Wall -DINFO)
+# fmt
+find_package(fmt REQUIRED)
+
+# include dirs
+include_directories(include)
 include_directories(${PROJECT_SOURCE_DIR}/extern_libraries/n2/include)
-include_directories(/usr/include/spdlog/include) 
+include_directories(/usr/include/spdlog/include) # 如果你需要的话
+
+# link dir for n2.so
 link_directories(${PROJECT_SOURCE_DIR}/extern_libraries/n2/build/lib)
 
+# add src 子目录
 add_subdirectory(src)
