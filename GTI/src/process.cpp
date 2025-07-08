@@ -170,7 +170,7 @@ void update(Objects *data, GTI *&gti, Objects *query, char *res_file, char *gt_f
     gt->loadGT(gt_file);
     gt->num = 100;
 
-    unsigned delete_data_size = 10;
+    unsigned delete_data_size = 1000;
     Objects *delete_data = new Objects();
     delete_data->vecs.assign(data->vecs.end() - delete_data_size, data->vecs.end());
     delete_data->num = delete_data_size;
@@ -201,6 +201,7 @@ void update(Objects *data, GTI *&gti, Objects *query, char *res_file, char *gt_f
     s = std::chrono::high_resolution_clock::now();
     for (unsigned i = 0; i < query->num; i++)
         gti->search(query->vecs[i].data(), l, k, results[i]); // Search GTI
+    std::cout << "result[0].size() = " << results[0].size() << std::endl;
     e = std::chrono::high_resolution_clock::now();
     diff = e - s;
     float time_search = diff.count();

@@ -40,6 +40,7 @@ float GroundTruth::getRecall(NN &results, unsigned k)
         for (unsigned j = 0; j < k; j++)
         {
             int id = results[i][j].id;
+//            std::cout << "id = " << id <<std::endl;
             auto ptr = std::find(objects_int[i].begin(), objects_int[i].begin() + k, id);
             if (ptr != objects_int[i].begin() + k)
                 recall++;

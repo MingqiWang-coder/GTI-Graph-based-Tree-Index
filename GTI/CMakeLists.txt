@@ -31,3 +31,4 @@ link_directories(${PROJECT_SOURCE_DIR}/extern_libraries/n2/build/lib)
 
 # add src 子目录
 add_subdirectory(src)
+add_subdirectory(bindings)

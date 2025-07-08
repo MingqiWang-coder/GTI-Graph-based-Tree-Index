@@ -28,6 +28,17 @@ void GTI::init(unsigned capacity_up_i, unsigned capacity_up_l, int m, Objects *d
 {
     this->data = data; // Initialize data
 
+//    this->data = new Objects();
+//    this->data->dim = data->dim;
+//    this->data->num = data->num;
+//    this->data->type = data->type;
+//
+//    this->data->vecs.clear();
+//    this->data->vecs.reserve(data->vecs.size());
+//    for (const auto& vec : data->vecs) {
+//        this->data->vecs.emplace_back(vec); // vector 会自动深拷贝
+//    }
+//    std::cout << "init data->dim = " << this->data->dim <<std::endl;
     // Initialize node capacity
     this->capacity_up_i = capacity_up_i;
     this->capacity_up_l = capacity_up_l;
@@ -45,6 +56,7 @@ void GTI::init(unsigned capacity_up_i, unsigned capacity_up_l, int m, Objects *d
     this->m = m;
     int core_count = std::thread::hardware_concurrency(); // Get number of cores
     n_threads = core_count / 2;                           // Number of threads
+//    n_threads = 1;
     max_m0 = 2 * m;
     ef_construction = 5 * max_m0;
 }
@@ -127,20 +139,20 @@ void GTI::insertAll()
         entry->radius = INF_DIS;
         entry->child = NULL;
 
-        // Print progress bar
-        // if (i < data->num - 1)
-        // {
-        //     printf("\rBUilding[%.2lf%%]:", i * 100.0 / (data->num - 1));
-        // }
-        // else
-        // {
-        //     printf("\rDone[%.2lf%%]:", i * 100.0 / (data->num - 1));
-        // }
-        // int show_num = i * 20 / data->num;
-        // for (int j = 1; j <= show_num; j++)
-        // {
-        //     std::cout << "█";
-        // }
+//         Print progress bar;
+//         if (i < data->num - 1)
+//         {
+//             printf("\rBUilding[%.2lf%%]:", i * 100.0 / (data->num - 1));
+//         }
+//         else
+//         {
+//             printf("\rDone[%.2lf%%]:", i * 100.0 / (data->num - 1));
+//         }
+//         int show_num = i * 20 / data->num;
+//         for (int j = 1; j <= show_num; j++)
+//         {
+//             std::cout << "█";
+//         }
 
         insert(root, entry, entries_in, dists, INF_DIS); // Insert objects
     }
