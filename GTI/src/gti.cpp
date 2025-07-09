@@ -55,8 +55,8 @@ void GTI::init(unsigned capacity_up_i, unsigned capacity_up_l, int m, Objects *d
     // Initialize graph parameters
     this->m = m;
     int core_count = std::thread::hardware_concurrency(); // Get number of cores
-    n_threads = core_count / 2;                           // Number of threads
-//    n_threads = 1;
+//    n_threads = core_count / 2;                           // Number of threads
+    n_threads = 1;
     max_m0 = 2 * m;
     ef_construction = 5 * max_m0;
 }
