@@ -36,7 +36,7 @@ void GTI::init(unsigned capacity_up_i, unsigned capacity_up_l, int m, Objects *d
 //    this->data->vecs.clear();
 //    this->data->vecs.reserve(data->vecs.size());
 //    for (const auto& vec : data->vecs) {
-//        this->data->vecs.emplace_back(vec); // vector 会自动深拷贝
+//        this->data->vecs.emplace_back(vec);
 //    }
 //    std::cout << "init data->dim = " << this->data->dim <<std::endl;
     // Initialize node capacity

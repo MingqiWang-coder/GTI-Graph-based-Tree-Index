@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(GTI LANGUAGES CXX)
 
-# 强制使用旧ABI，和extern_libraries/n2库保持一致
+# Force the use of the old ABI, consistent with the extern_libraries/n2 library.
 add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
 
 set(CMAKE_BUILD_TYPE Release)
@@ -24,11 +24,11 @@ find_package(fmt REQUIRED)
 # include dirs
 include_directories(include)
 include_directories(${PROJECT_SOURCE_DIR}/extern_libraries/n2/include)
-include_directories(/usr/include/spdlog/include) # 如果你需要的话
+include_directories(/usr/include/spdlog/include) # if need
 
 # link dir for n2.so
 link_directories(${PROJECT_SOURCE_DIR}/extern_libraries/n2/build/lib)
 
-# add src 子目录
+# add src Subdirectory
 add_subdirectory(src)
 add_subdirectory(bindings)

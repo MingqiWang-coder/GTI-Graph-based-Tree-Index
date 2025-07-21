@@ -1,6 +1,3 @@
-//
-// Created by mingqi on 25-7-8.
-//
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
@@ -18,9 +15,9 @@ class GTIWrapper {
 private:
     GTI* gti;
     Objects* data;
-    std::unordered_map<int, int> external_to_internal;  // 外部id到内部索引的映射
-    std::vector<int> internal_to_external;  // 内部索引到外部id的映射
-    std::vector<bool> deleted_flags;  // 标记已删除的向量
+    std::unordered_map<int, int> external_to_internal;  // external ID to internal ID
+    std::vector<int> internal_to_external;  // internal ID to external ID
+    std::vector<bool> deleted_flags;  // Mark deleted vectors
 
 public:
     GTIWrapper() : gti(nullptr), data(nullptr) {}
@@ -64,46 +61,27 @@ public:
         float* ptr_X = static_cast<float*>(buf_X.ptr);
         int* ptr_ids = static_cast<int*>(buf_ids.ptr);
 
-        // 初始化数据结构
         data->dim = dim;
         data->num = n;
         data->type = 0;
         data->vecs.clear();
         data->vecs.reserve(n);
 
-        // 清空映射
         external_to_internal.clear();
         internal_to_external.clear();
         deleted_flags.clear();
 
-        // 添加向量和建立映射
         for (int i = 0; i < n; i++) {
             std::vector<float> vec(ptr_X + i * dim, ptr_X + (i + 1) * dim);
             data->vecs.push_back(vec);
 
             int external_id = ptr_ids[i];
-            // 内部索引就是在data->vecs中的位置
             external_to_internal[external_id] = i;
             internal_to_external.push_back(external_id);
             deleted_flags.push_back(false);
         }
 
-        // 构建GTI索引
         gti->buildGTI(capacity_up_i, capacity_up_l, m, data);
-
-//        if (!data->vecs.empty()) {
-//            std::vector<Neighbor> results;
-//            float* query_ptr = data->vecs[0].data(); // 取第一个向量作为查询
-//            unsigned L = 10; // 可调参数：候选集大小
-//            unsigned K = 5;  // 返回前K个结果
-//
-//            gti->search(query_ptr, L, K, results);
-//
-//            std::cout << "Search results for the first vector:" << std::endl;
-//            for (auto& neighbor : results) {
-//                std::cout << "id: " << neighbor.id << ", distance: " << neighbor.dis << std::endl;
-//            }
-//         }
 
     }
 
@@ -125,7 +103,6 @@ public:
         float* ptr_X = static_cast<float*>(buf_X.ptr);
         int* ptr_ids = static_cast<int*>(buf_ids.ptr);
 
-        // 创建插入数据对象
         Objects* insert_data = new Objects();
         insert_data->dim = dim;
         insert_data->num = n;
@@ -133,27 +110,22 @@ public:
         insert_data->vecs.clear();
         insert_data->vecs.reserve(n);
 
-        // 记录插入前的大小
         int old_size = data->vecs.size();
 
-        // 添加向量到主数据结构
         for (int i = 0; i < n; i++) {
             std::vector<float> vec(ptr_X + i * dim, ptr_X + (i + 1) * dim);
 //            data->vecs.push_back(vec);
             insert_data->vecs.push_back(vec);
 
             int external_id = ptr_ids[i];
-            int internal_index = old_size + i;  // 新的内部索引
+            int internal_index = old_size + i;
 
             external_to_internal[external_id] = internal_index;
             internal_to_external.push_back(external_id);
             deleted_flags.push_back(false);
         }
 
-        // 更新data的数量
-//        data->num = data->vecs.size();
 
-        // 插入到GTI
         gti->insertGTI(insert_data);
 
         delete insert_data;
@@ -169,14 +141,12 @@ public:
         int n = buf_ids.shape[0];
         int* ptr_ids = static_cast<int*>(buf_ids.ptr);
 
-        // 创建删除数据对象
         Objects* delete_data = new Objects();
         delete_data->dim = data->dim;
         delete_data->num = 0;
         delete_data->type = 0;
         delete_data->vecs.clear();
 
-        // 根据外部id找到对应的向量
         for (int i = 0; i < n; i++) {
             int external_id = ptr_ids[i];
             auto it = external_to_internal.find(external_id);
@@ -202,7 +172,6 @@ public:
 //            std::cout << "\n----\n";
 //        }
 
-        // 从GTI删除
         if (delete_data->num > 0) {
             gti->deleteGTI(delete_data);
         }
@@ -221,7 +190,6 @@ public:
         int dim = buf_X.shape[1];
         float* ptr_X = static_cast<float*>(buf_X.ptr);
 
-        // 创建结果数组
         auto results = py::array_t<int>({n, k});
         auto distances = py::array_t<float>({n, k});
         auto buf_results = results.request();
@@ -229,20 +197,16 @@ public:
         int* ptr_results = static_cast<int*>(buf_results.ptr);
         float* ptr_distances = static_cast<float*>(buf_distances.ptr);
 
-        // 对每个查询向量进行搜索
         for (int i = 0; i < n; i++) {
             std::vector<Neighbor> query_results;
             float* query_vec = ptr_X + i * dim;
 
             gti->search(query_vec, L, k, query_results);
 
-
-            // 将内部id转换为外部id
             for (int j = 0; j < k && j < query_results.size(); j++) {
                 int internal_id = query_results[j].id;
                 int external_id = -1;
 
-                // 检查内部ID是否有效且未被删除
                 if (internal_id >= 0 && internal_id < internal_to_external.size() &&
                     !deleted_flags[internal_id]) {
                     external_id = internal_to_external[internal_id];
@@ -252,7 +216,6 @@ public:
                 ptr_distances[i * k + j] = query_results[j].dis;
             }
 
-            // 填充剩余位置
             for (int j = query_results.size(); j < k; j++) {
                 ptr_results[i * k + j] = -1;
                 ptr_distances[i * k + j] = std::numeric_limits<float>::max();
@@ -266,7 +229,6 @@ public:
         return data ? data->num : 0;
     }
 
-    // 添加调试方法
     void debug_info() {
         std::cout << "Data size: " << (data ? data->num : 0) << std::endl;
         std::cout << "Vectors size: " << (data ? data->vecs.size() : 0) << std::endl;
