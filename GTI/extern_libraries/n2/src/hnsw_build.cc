@@ -636,7 +636,8 @@ namespace n2
         logger_ = spdlog::get("n2");
         if (logger_ == nullptr)
         {
-            logger_ = spdlog::stdout_logger_mt("n2");
+            // 兼容新版 spdlog API
+            logger_ = spdlog::stdout_color_mt("n2");
         }
     }
 
