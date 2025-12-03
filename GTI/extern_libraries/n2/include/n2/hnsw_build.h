@@ -19,6 +19,7 @@
 #include <fstream>
 
 #include "spdlog/spdlog.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
 
 #include "common.h"
 #include "distance.h"
